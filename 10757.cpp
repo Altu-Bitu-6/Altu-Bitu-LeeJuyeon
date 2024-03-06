@@ -11,20 +11,20 @@ int main()
 
     string a, b;
     cin >> a >> b;
-    int lenA = a.length();
-    int lenB = b.length();
+    int len_a = a.length();
+    int len_b = b.length();
 
     stack<int> s_a;
     stack<int> s_b;
     stack<int> answer;
 
-    if (lenB > lenA) {
+    if (len_b > len_a) {
         swap(a, b);
-        swap(lenA, lenB);
+        swap(len_a, len_b);
     }
 
-    if (lenA != lenB){
-        for (int i=0; i < (lenA - lenB); i++)
+    if (len_a != len_b){
+        for (int i=0; i < (len_a - len_b); i++)
             s_b.push(0);
     }
 
@@ -34,7 +34,7 @@ int main()
     int carry = 0; 
     int sum; 
     
-    for(int i=0; i < lenA; i++)
+    for(int i=0; i < len_a; i++)
     {
         sum = s_a.top() + s_b.top();
         
