@@ -6,17 +6,19 @@
 
     bool isOutOfBoard(pair<int, int> pos){
         if(pos.first < 1 || pos.first > 8 || pos.second < 1 || pos.second > 8){
-            return false;
+            return true;
         }
         else {
-            return true;
+            return false;
         }
     }
 
-    void moveKing(string move, pair<int, int> &king, pair<int, int> &rock){
+    vector<int> moveKing(string move, pair<int, int> king, pair<int, int> rock){
+        pair<int, int> my_king = king;
+        pair<int, int> my_rock = rock;
+
         // move: 8개의 이동 종류 중 몇 번째의 이동인지
-        // king: 현재 king의 위치 받아와서 변경해주기
-        // rock: 현재 rock의 위치 받아와서 변경해주기
+        
         vector<int> dx = {1, -1, 0, 0, 1, -1, 1, -1};
         vector<int> dy = {0, 0, -1, 1, 1, 1, -1, -1};
         vector<string> moves = {"R", "L", "B", "T", "RT", "LT", "RB", "LB"};
@@ -28,17 +30,18 @@
             }
         }
         
-        pair<int, int> tmp_king = {king.first + dx[i], king.second + dy[i]};
-        pair<int, int> tmp_rock = {rock.first + dx[i], rock.second + dy[i]};
+        pair<int, int> tmp_king = {my_king.first + dx[i], my_king.second + dy[i]};
+        pair<int, int> tmp_rock = my_rock;
+        
+        if(tmp_king==my_rock){
+            tmp_rock = {my_rock.first + dx[i], my_rock.second + dy[i]};
+        }
+        
         if(!isOutOfBoard(tmp_king) && !isOutOfBoard(tmp_rock)){
-            king = tmp_king;
-            if(king==rock){
-                rock = tmp_rock;
-            }
+            my_king = tmp_king;
+            my_rock = tmp_rock;
         }
-        else{
-                cout << "이동x\n";
-        }
+        return {my_king.first, my_king.second, my_rock.first, my_rock.second};
         
     }
 
@@ -65,9 +68,10 @@
         for(int i=0; i<move_cnt; i++){
             string cur_move;
             cin >> cur_move;
-            moveKing(cur_move, my_king, my_rock);
+            vector<int> cur_pos = moveKing(cur_move, my_king, my_rock);
+            my_king = {cur_pos[0], cur_pos[1]};
+            my_rock = {cur_pos[2], cur_pos[3]};
         }
 
-        //cout << col[my_king.first-1] << my_king.second << "\n" << col[my_rock.first-1] << my_rock.second;
-        cout << my_king.first << my_king.second << "\n" << my_rock.first << my_rock.second;
+        cout << col[my_king.first-1] << my_king.second << "\n" << col[my_rock.first-1] << my_rock.second;
     }
