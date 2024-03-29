@@ -26,12 +26,6 @@ int main(){
             if(max_speed % planet[i] != 0){
                 max_speed = (max_speed / planet[i] + 1) * planet[i];
             }
-            else{
-                continue;
-            }
-        }
-        else{
-            continue;
         }
     }
 
