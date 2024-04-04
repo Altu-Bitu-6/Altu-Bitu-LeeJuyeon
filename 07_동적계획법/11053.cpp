@@ -1,43 +1,33 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using namespace std; 
 
-vector<int> arr;
-
-int findMaxLen(int n){ //n항부터 시작했을 때의 부분수열 길이 최댓값
-    if(n>=arr.size()-1){
-        return 1;
-    }
-
-    int max_size = 1; 
-    for(int i=n+1; i<arr.size(); i++){
-        if(arr[n] < arr[i]){
-            max_size++;
-        }
-        else{
-            break;
-        }
-        
-    }
-    return max_size;
-}
-
 int main(){
-    int arr_count; 
-    cin >> arr_count;
+    int arr_count; // 입력받을 배열의 크기 입력
+    cin >> arr_count; // 입력받은 크기만큼의 정수 배열
+    vector<int> arr(arr_count);
+
+    // 입력
     for(int i=0; i<arr_count; i++){
-        int tmp;
-        cin >> tmp; 
-        arr.push_back(tmp);
+        cin >> arr[i]; 
     }
 
-    int result = 1;
+    // 각 위치에서 가장 긴 증가하는 부분 수열의 길이를 저장하는 배열
+    vector<int> ans(arr_count, 1);
+
     for(int i=0; i<arr_count; i++){
-        int tmp2 = findMaxLen(i);
-        if(tmp2 > result){
-            result = tmp2;
+        for(int j=0; j<i; j++){
+            // 현재 위치의 숫자가 이전 위치의 숫자보다 크다면
+            if(arr[i] > arr[j]){
+                // 가장 긴 증가하는 부분 수열의 길이 갱신
+                ans[i] = max(ans[i], ans[j]+1);
+            }
         }
     }
 
-    cout << result;
+    // 가장 긴 증가하는 부분 수열의 길이 중 최댓값
+    cout << *max_element(ans.begin(), ans.end()) << endl;
+
+    return 0;
 }
