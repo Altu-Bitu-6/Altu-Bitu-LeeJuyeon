@@ -1,113 +1,88 @@
+// 2615번 오목: https://www.acmicpc.net/problem/2615
 #include <iostream>
 #include <vector>
-#include <stack>
-#include <algorithm>
-using namespace std; 
 
-vector<vector<int>> badukpan;
-vector<vector<int>> visited;
-stack<pair<int, int>> s;
+using namespace std;
 
-vector<int> dx = {1, -1,0, 0, 1, -1, -1, 1};
-vector<int> dy = {0, 0, 1, -1, 1, -1, 1, -1};
+typedef vector<vector<int>> matrix; // 2차원 벡터를 matrix로 정의
 
-int ans_winner=0;
-pair<int, int> ans_start;
+const int SIZE = 20, EMPTY = 0; // 바둑판 크기와 빈 공간 상태를 상수로 정의
 
-vector<pair<int, int>> five_line;
+// 방향에 따른 좌표 증가량
+// 맨 왼쪽 위 돌을 기준으로 검사하기 때문에 오른쪽+아래쪽으로 향하는 방향만 정의
+const vector<int> dx = {-1, 0, 1, 1}; // x좌표 증가량
+const vector<int> dy = {1, 1, 1, 0}; // y좌표 증가량
 
-bool isInsideBoard(int x, int y){
-    if(x>=0 && y>=0 && x<19 &&y<19){
-        return true;
+/**
+ * 범위와 돌의 종류가 유효한지 확인하는 함수
+ * board: 바둑판
+ * x: 검사할 x좌표
+ * y: 검사할 y좌표
+ * color: 검사할 돌의 색
+ * 유효한 경우 true, 아닌 경우 false를 반환
+*/
+bool isValid(matrix &board, int x, int y, int color) {
+    return (x > 0 && x < SIZE && y > 0 && y < SIZE && board[x][y] == color); // 바둑판 범위 내에서 돌의 색이 유효한지 확인
+}
+
+/**
+ * 해당 좌표(x, y)부터 연속적으로 5알이 놓이는지 확인하는 함수
+ * board: 바둑판
+ * x: 시작 x좌표
+ * y: 시작 y좌표
+ * 연속적으로 5알이 놓였으면 true, 아니면 false를 반환
+*/
+bool checkWin(matrix &board, int x, int y) {
+    int color = board[x][y]; // 기준 색
+
+    // 4 방향에 대해 검사
+    for (int idx = 0; idx < 4; idx++) {
+        int cnt = 1; // 같은 방향에 놓인 같은 색 돌의 수
+        int prev_x = x - dx[idx], prev_y = y - dy[idx]; // 이전 위치
+        int next_x = x + dx[idx], next_y = y + dy[idx]; // 다음 위치
+
+        // 같은 방향에서 그 이전에도 같은 색 돌이 있었다면 패스 (-> 여섯 알 이상 놓이는 경우를 제외하기 위함)
+        if (isValid(board, prev_x, prev_y, color)) {
+            continue;
+        }
+
+        // 연속적으로 놓인 5알이 같은 색인지 확인
+        while (isValid(board, next_x, next_y, color) && cnt < 6) { // 동일 색상의 돌이 연속으로 5개 놓이거나 범위 내에 존재하는 동안 반복
+            next_x += dx[idx]; // 다음 x좌표 이동
+            next_y += dy[idx]; // 다음 y좌표 이동
+            cnt++; // 동일 색상 돌 개수 증가
+        }
+        // cnt가 5일 때만 true 리턴 (-> 다섯 알보다 적거나 다섯 알보다 많이 놓이는 경우를 제외)
+        if (cnt == 5) {
+            return true;
+        }
     }
     return false;
 }
 
-// 점 (x,y)로부터 5개 맞나 확인
-bool isWin(int x, int y, int dx, int dy){
-    int first_stone = badukpan[x][y];
-    if(first_stone==0){
-        return false;
-    }
-    for(int i=0; i<5; i++){
-        five_line.push_back({x+(i*dx), y+(i*dy)});
-        if(first_stone != badukpan[x+(i*dx)][y+(i*dy)]){
-            five_line.clear();
-            return false;
-        }
-    }
-    return true;
-}
+int main() {
+    // 입력
+    matrix board(SIZE, vector<int>(SIZE, 0)); // 바둑판 초기화
+    for (int i = 1; i < SIZE; i++) // 바둑판 입력 받기
+        for (int j = 1; j < SIZE; j++)
+            cin >> board[i][j];
 
-pair<int, int> findLeftofFive(vector<pair<int, int>> five){
-    int index = 0;
-    int min = five[index].first + five[index].second;
-    bool isRightSideways = false;
-    for(int i=1; i<5; i++){
-        if(five[i].first + five[i].second < min){
-            index = i;
-        }
-        else if(five[i].first + five[i].second == min){
-            isRightSideways = true;
-            break;
-        }
-    }
-
-    if(isRightSideways){
-        int min_y = five[0].second;
-        for(int i=0; i<5; i++){
-            if(five[i].second < min_y){
-                index = i;
+    // 연산 및 출력
+    for (int y = 1; y < SIZE; y++) { // 모든 바둑판 위치에 대해 반복
+        for (int x = 1; x < SIZE; x++) {
+            // 빈 칸이면 패스
+            if (board[x][y] == EMPTY) { // 빈 칸인 경우 다음 위치로 이동
+                continue;
+            }
+            // 해당 좌표(x, y)부터 연속적으로 5알이 놓였다면 정답 출력
+            if (checkWin(board, x, y)) { // 오목이 완성된 경우
+                cout << board[x][y] << '\n' // 돌의 색상 출력
+                     << x << ' ' << y; // 오목이 시작된 좌표 출력
+                return 0;
             }
         }
     }
+    cout << 0; // 오목이 없는 경우 0 출력
 
-    return five[index];
-}
-
-void dfs(pair<int, int> start){
-    s.push(start);
-    while(!s.empty()){
-        pair<int, int> index = s.top();
-        s.pop();
-        visited[index.first][index.second] = true;
-        int cur_stone = badukpan[index.first][index.second];
-        for(int i=0; i<8; i++){
-            int next_x = index.first + dx[i];
-            int next_y = index.second + dy[i];
-
-            if(isInsideBoard(next_x, next_y) && !visited[next_x][next_y]){
-                int next_stone = badukpan[next_x][next_y];
-                s.push({next_x, next_y});
-                if(cur_stone==next_stone && cur_stone!=0 && isInsideBoard(index.first + dx[i]*4, index.second + dy[i]*4)){
-                    if(isWin(index.first, index.second, dx[i], dy[i])){
-                        ans_winner = badukpan[index.first][index.second];
-                        ans_start = findLeftofFive(five_line);
-                        break;
-                    }
-                }
-            }
-            
-        }
-    }
-}
-
-int main(){
-    vector<int> tmp;
-    tmp.assign(19, 0);
-    badukpan.assign(19, tmp);
-    visited.assign(19, tmp);
-
-    for(int i=0; i<19; i++){
-        for(int j=0; j<19; j++){
-            cin >> badukpan[i][j];
-        }
-    }
-
-    dfs({0, 0});
-    
-    cout << ans_winner << "\n";
-    if(ans_winner!=0){
-        cout << ans_start.first + 1<< " " << ans_start.second + 1;
-    }   
+    return 0;
 }
