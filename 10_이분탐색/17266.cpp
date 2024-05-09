@@ -1,59 +1,67 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-int n, m;
-vector<int> x;
+int N, M; // 굴다리의 길이, 가로등의 개수
+vector<int> light; // 가로등 위치 저장
+int answer; // 결과값
 
-int isValid(int height){
-    int result = 0;
-
-    for(int i=0; i<=x.size(); i++){
-        int left, right;
-
-        if(i==0) left = 0;
-        else left = x[i-1];
-        
-        if(i==x.size()) right = n;
-        else right = x[i];
-
-        if(right - left > height) result++;
+// 굴다리 전체를 비추는지 확인하는 함수
+bool check(int length) {
+    if (light[0] > length) {  // 첫 번째 가로등 처리
+        return false;
     }
 
-    if(result==0) return 1;
-    else return 0;
-}
-
-
-int binaryCheck() {
-    int left = 1; 
-    int right = n;
-    int mid;
-    
-    while (left <= right) {
-        mid = (left + right) / 2;  // 중간값 계산
-        // isValid 함수 호출하여 모든 위치를 밝힐 수 있는지 확인
-        if (isValid(mid)) {
-            // 설치할 수 있다면 더 작은 높이에서 시도해봄
-            right = mid - 1;
-        } else {
-            // 설치할 수 없다면 더 큰 높이에서 시도해봄
-            left = mid + 1;
+    for (int i = 1; i < M; i++) {
+        if (light[i] - light[i - 1] > 2 * length) {
+            return false;
         }
     }
-    return mid;  // 최적의 높이 반환
-}
 
-
-int main(){
-    cin >> n >> m;
-    for(int i=0; i<m; i++){
-        int tmp;
-        cin >> tmp;
-        x.push_back(tmp);
+    if (N - light[M - 1] > length) {  // 마지막 가로등 처리
+        return false;
     }
 
-    cout << binaryCheck();
+    return true;
+}
+
+// 이분 탐색 함수
+void binary_search() {
+    // 초기화
+    int left = 0;
+    int right = N;
+    int mid = (left + right) / 2;
+
+    // 이분 탐색
+    while (left <= right) {
+        // mid가 조건에 부합한다면
+        if (check(mid)) {
+            answer = mid; // 정답 처리
+            // 더 짧은 길이로 다음 탐색
+            right = mid - 1;
+        } else {
+            // 조건에 부합하지 않는다면, 더 긴 길이로 다음 탐색
+            left = mid + 1;
+        }
+
+        mid = (left + right) / 2;
+    }
+}
+
+int main() {
+    // 입력
+    cin >> N >> M;
+    light.resize(M);
+    for (int i = 0; i < M; i++) {
+        cin >> light[i];
+    }
+
+    // 연산
+    binary_search();
+
+    // 출력
+    cout << answer;
+
+    return 0;
 }
