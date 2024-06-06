@@ -8,5 +8,6 @@
         "utility": "cpp",
         "queue": "cpp",
         "deque": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
